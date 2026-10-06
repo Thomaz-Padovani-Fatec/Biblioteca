@@ -4,6 +4,8 @@ import Login from "./pages/Login";
 import Livros from "./pages/Livros";
 import CadastroLivro from "./pages/CadastroLivro";
 import Emprestimos from "./pages/Emprestimos";
+import Cabecalho from "./components/Cabecalho";
+import RotaProtegida from "./components/RotaProtegida";
 import "./App.css";
 
 // Aula 10 (Tour Guiado pelo Projeto Completo).

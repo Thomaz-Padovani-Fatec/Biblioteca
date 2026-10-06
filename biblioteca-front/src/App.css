@@ -1,4 +1,5 @@
 * { box-sizing: border-box; }
+h1, h2 { color: #14274f; }
 body { margin: 0; font-family: system-ui, sans-serif; background: #f3f7fa; color: #232629; }
 
 .cabecalho {
