@@ -31,8 +31,6 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::post('/livros', [LivroController::class, 'store']);
     Route::match(['put', 'patch'], '/livros/{livro}', [LivroController::class, 'update']);
     Route::delete('/livros/{livro}', [LivroController::class, 'destroy']);
-    Route::post('/livros/{livro}/capa', [LivroController::class, 'uploadCapa']);
-    Route::delete('/livros/{livro}/capa', [LivroController::class, 'removerCapa']);
 
     Route::post('/autores', [AutorController::class, 'store']);
     Route::match(['put', 'patch'], '/autores/{autor}', [AutorController::class, 'update']);

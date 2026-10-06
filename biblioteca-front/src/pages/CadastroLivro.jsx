@@ -5,13 +5,11 @@ import api from "../api/client";
 import CampoTexto from "../components/CampoTexto";
 import CampoIsbn from "../components/CampoIsbn";
 import SelectAutor from "../components/SelectAutor";
-import CampoCapa from "../components/CampoCapa";
 import MensagemErro from "../components/MensagemErro";
 
 export default function CadastroLivro() {
   const [autores, setAutores] = useState([]);
   const [form, setForm] = useState({ titulo: "", isbn: "", ano_publicacao: "", autor_id: "" });
-  const [capa, setCapa] = useState(null);
   const [erro, setErro] = useState(null);
   const [buscandoIsbn, setBuscandoIsbn] = useState(false);
   const [erroIsbn, setErroIsbn] = useState(null);
@@ -54,19 +52,8 @@ export default function CadastroLivro() {
     e.preventDefault();
     setErro(null);
     try {
-      // 1) cria o livro (dados em JSON)
-      const { data: livro } = await api.post("/livros", form);
-
-      // 2) se uma capa foi selecionada, envia em uma segunda requisição multipart
-      if (capa) {
-        const dadosCapa = new FormData();
-        dadosCapa.append("capa", capa);
-        await api.post(`/livros/${livro.id}/capa`, dadosCapa, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      }
-
-      // 3) por fim, se tudo acima deu certo, volta para a página de livros
+      await api.post("/livros", form);
+      
       navigate("/livros");
     } catch (err) {
       setErro(err.response?.data?.message ?? "Não foi possível cadastrar o livro.");
@@ -102,9 +89,6 @@ export default function CadastroLivro() {
           autores={autores}
           value={form.autor_id}
           onChange={handleChange}
-        />
-        <CampoCapa
-          onChange={setCapa}
         />
         
         {erro && <MensagemErro mensagem={erro} />}

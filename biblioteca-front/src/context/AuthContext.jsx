@@ -1,4 +1,4 @@
-// Context API nunca foi um conteúdo formal das nossas aulas.
+// Aula 14 (Construindo o Front-end: Consumindo a API do Laravel).
 // Em resumo: é um jeito do React compartilhar um mesmo state
 // (Nesse caso, o usuário logado) entre componentes sem precisar
 // passar como prop de componente em componente. Todo o resto

@@ -10,19 +10,12 @@ já têm migrations, relacionamentos, autenticação e regras de negócio implem
 
 > **Aviso sobre o escopo avaliado do projeto semestral**
 >
-> Por causa de uma reorganização de cronograma no meio do semestre, dois pontos
-> deste repositório deixaram de ser **requisito de avaliação** da Entrega Parcial
-> e da Entrega Final, virando conteúdo complementar/opcional:
->
-> - **Upload de capa de livro** (`LivroController::uploadCapa`/`removerCapa`,
->   Intervention Image) continua implementado aqui como referência, mas a
->   equipe não precisa replicar isso no próprio projeto para ser avaliada.
-> - **Layout responsivo**: não é cobrado na avaliação; o front-end de
->   referência não foi construído com esse cuidado em mente.
->
-> Se sua equipe quiser implementar qualquer um dos dois por conta própria, ótimo
-> Só não é obrigatório. Consulte o enunciado do projeto semestral vigente em
-> caso de dúvida sobre o que é avaliado.
+> Layout responsivo e upload de arquivos não fazem parte deste projeto nem da
+> avaliação. O front-end de referência não foi construído com layout
+> responsivo, e a capa do livro é apenas um link de imagem opcional (`capa_url`).
+> Se sua equipe quiser implementar qualquer um dos dois por conta própria,
+> ótimo. Só não é obrigatório. Consulte o enunciado do projeto semestral
+> vigente em caso de dúvida sobre o que é avaliado.
 
 ## Estrutura
 
@@ -51,92 +44,57 @@ biblioteca/
 | Migration `sessions` (driver `database`) | Encontro 5: Sessões no Laravel |
 | `.gitignore`, histórico de commits | Encontro 9: Git e GitHub |
 | `render.yaml`, `vercel.json`, CORS de produção, entrypoint com migrations automáticas | Encontro 13 e 14: Deploy em Produção |
-| Upload de capa via Laravel Storage + Intervention Image | Encontro 16: Upload de Arquivos (**conteúdo complementar, não avaliado**; veja aviso no topo deste README) |
 | Consumo de API pública (Google Books/Open Library) | Encontro 15, implementado em CadastroLivro.jsx |
-
-### Conteúdo presente no código, mas fora do que é ensinado neste semestre
-
-Os itens abaixo continuam implementados neste repositório como referência (código real
-e funcional), mas **não fazem mais parte do roteiro do semestre atual**. O conteúdo que
-os ensinaria foi remanejado para Desenvolvimento Web III por causa de uma reorganização
-de cronograma. Não é necessário entender ou replicar isso para as entregas deste semestre.
-
-| Módulo | Assunto (Web III) |
-|---|---|
-| `Dockerfile` + `docker-compose.yml` do back-end | Containerização com Docker |
-| Testes de Feature (PHPUnit) e testes de componente (Vitest) | Qualidade de Código e Testes Automatizados |
-| `.github/workflows/ci.yml` | CI/CD |
-| React Helmet, `robots.txt`/`sitemap.xml`, code splitting, `React.memo`, `loading="lazy"` | SEO e Performance |
 
 ## Como rodar localmente
 
 Veja o guia completo de instalação (`guia_instalacao_stack.docx`, já compartilhado)
-para instalar PHP, Composer, Node e Docker.
+para instalar PHP, Composer e Node.
 
 ### Back-end
 
-Este repositório contém apenas o **código da aplicação** (`app/`, `database/`,
-`routes/`, `composer.json` com as dependências extras), não o esqueleto do
-framework (`artisan`, `bootstrap/`, `public/`, `resources/`, `storage/`), que é
-idêntico em qualquer projeto Laravel novo e por isso não foi incluído aqui.
-Você precisa gerar esse esqueleto uma vez e mesclar com o que já está aqui:
+```
+git clone <url-do-repositorio>
+cd biblioteca/biblioteca-api
+
+composer install
+
+# macOS / Linux:
+cp .env.example .env
+# Windows (PowerShell):
+copy .env.example .env
+
+php artisan key:generate
+```
+
+Abra o `.env` e preencha só os dados do banco (`DB_HOST`, `DB_USERNAME` e
+`DB_PASSWORD`), usando a conexão **Session pooler** do Supabase. As variáveis
+`AUTH_MODEL` e `FRONTEND_URL` já vêm preenchidas no `.env.example`, apenas
+confira que estão no seu `.env`.
 
 ```
-# 1. gere o esqueleto do Laravel em uma pasta TEMPORÁRIA (separada desta)
-cd ..
-composer create-project laravel/laravel biblioteca-api-esqueleto
-
-# 2. copie o esqueleto por cima da pasta deste projeto, SEM sobrescrever
-#    os arquivos que já existem aqui
-
-# macOS / Linux:
-cp -rn biblioteca-api-esqueleto/. biblioteca-api/
-
-# Windows (PowerShell):
-robocopy biblioteca-api-esqueleto biblioteca-api /E /XC /XN /XO
-
-# 3. confirme que o artisan chegou
-cd biblioteca-api
-ls artisan
-
-# 4. reinstale as dependências (agora com o composer.json completo)
-composer update
-
-# 4b. limpe o cache de descoberta de pacotes, ele foi copiado do esqueleto
-#     temporário e pode referenciar pacotes (ex.: laravel/pail) que não
-#     estão no nosso composer.json, causando erro "Class ... not found"
-
-# macOS / Linux:
-rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
-
-# Windows (PowerShell):
-Remove-Item bootstrap\cache\packages.php, bootstrap\cache\services.php -ErrorAction SilentlyContinue
-
-composer dump-autoload
-
-# 5. finalize a configuração
-cp .env.example .env
-php artisan key:generate
-# edite o .env com os dados do seu banco Supabase
 php artisan migrate --seed
 php artisan serve
-
-# 6. pode apagar a pasta temporária
-rm -rf ../biblioteca-api-esqueleto
 ```
-
-> Se `php artisan` retornar "Could not open input file: artisan", é sinal de
-> que o passo 1-2 não foi feito: você está tentando rodar comandos do
-> Laravel numa pasta que só tem o código da aplicação, sem o framework em si.
 
 ### Front-end
 
+Em outro terminal:
+
 ```
-cd biblioteca-front
-npm install
+cd biblioteca/biblioteca-front
+
+# macOS / Linux:
 cp .env.example .env
+# Windows (PowerShell):
+copy .env.example .env
+
+npm install
 npm run dev
 ```
+
+O `VITE_API_URL` do `.env` já vem como `http://127.0.0.1:8000/api/v1`. Se você
+mudar esse arquivo, pare e suba o `npm run dev` de novo.
 
 ### Usuário de teste (criado pelo seeder)
 
@@ -146,76 +104,38 @@ senha: password
 perfil: bibliotecario
 ```
 
-## Rodando os testes
+### Se algo der errado
 
-```
-# back-end (usa SQLite em memória, configurado no phpunit.xml padrão do Laravel)
-cd biblioteca-api
-php artisan test
-
-# front-end
-cd biblioteca-front
-npm run test
-```
-
-## Upload de capa de livro
-
-Depois de configurar o `.env`, publique o link simbólico de storage uma vez:
-
-```
-php artisan storage:link
-```
-
-Sem isso, as imagens salvas em `storage/app/public` não ficam acessíveis pela URL pública.
-
-## CI/CD com GitHub Actions
-
-> Conteúdo de referência para Desenvolvimento Web III: CI/CD não faz parte do
-> roteiro deste semestre. Esta seção continua aqui porque o workflow já está
-> funcional no repositório, não porque será cobrado agora.
-
-O workflow em `.github/workflows/ci.yml` roda a cada push e pull request na branch
-`main`, com três jobs:
-
-1. **backend**: sobe um PostgreSQL de serviço, instala as dependências via Composer, roda o lint (`laravel/pint`) e a suíte de testes (`php artisan test`)
-2. **frontend**: instala as dependências via npm, roda lint, os testes com Vitest, e o build de produção
-3. **deploy-homologacao**: opcional; só roda na `main` e só se os dois jobs anteriores passarem. Dispara um [deploy hook](https://render.com/docs/deploy-hooks) do Render via `curl`
-
-> Se o repositório do time for único (monorepo com `biblioteca-api/` e
-> `biblioteca-front/` juntos), este arquivo já funciona como está. Se optarem
-> por dois repositórios separados, copie o arquivo para cada um e remova o job
-> que não se aplica.
-
-Para o job de deploy funcionar, cadastre o secret `RENDER_DEPLOY_HOOK_URL` nas
-configurações do repositório no GitHub (Settings → Secrets and variables →
-Actions), com a URL do deploy hook gerada no painel do Render. **Isso é
-opcional**: o Render já faz auto-deploy sozinho quando conectado ao GitHub;
-esse job só faz sentido se vocês quiserem que o deploy só aconteça depois do
-CI passar.
+- `could not find driver`: habilite `pdo_pgsql` (e `pgsql`) no `php.ini`
+- `could not translate host name`: use o **Session pooler** do Supabase, não a conexão direta
+- CORS ou erro 404 no login: o `VITE_API_URL` precisa terminar em `/v1`, e o `FRONTEND_URL` do back-end precisa ter a origem exata do front-end (rode `php artisan config:clear` depois de mudar)
+- "Credenciais inválidas" com e-mail e senha certos: confira o `AUTH_MODEL=App\Models\Usuario` no `.env`
 
 ## Deploy em produção
 
+O repositório tem as duas pastas (`biblioteca-api` e `biblioteca-front`), então cada
+serviço precisa saber em qual pasta trabalhar (campo **Root Directory**).
+
 ### Back-end no Render
 
-1. Suba o repositório do back-end no GitHub e conecte no Render como "New Web Service" (ou use o `render.yaml` deste repositório com "New Blueprint")
-2. Preencha as variáveis de ambiente marcadas com `sync: false` no `render.yaml` (chave da aplicação, dados do Supabase, URL do front-end)
-3. O `docker-entrypoint.sh` roda `migrate --force` automaticamente a cada deploy, não precisa rodar migration manualmente em produção
+1. No Render, crie um **New Web Service** a partir deste repositório do GitHub
+2. Em **Root Directory**, informe `biblioteca-api`, e escolha **Docker** como runtime (o `Dockerfile` já está nessa pasta)
+3. Preencha as variáveis de ambiente listadas no `render.yaml`: `APP_KEY`, `AUTH_MODEL`, os dados do Supabase (`DB_*`) e `FRONTEND_URL` (a URL do front-end na Vercel)
+4. O `docker-entrypoint.sh` roda `migrate --force` automaticamente a cada deploy, não precisa rodar migration manualmente em produção
 
-### Front-end no Vercel
+### Front-end na Vercel
 
-1. Importe o repositório do front-end no Vercel
-2. Configure a variável de ambiente `VITE_API_URL` apontando para a URL pública do back-end no Render (ex.: `https://biblioteca-api.onrender.com/api`)
+1. Importe este mesmo repositório na Vercel e, em **Root Directory**, informe `biblioteca-front`
+2. Configure a variável de ambiente `VITE_API_URL` apontando para a URL pública do back-end no Render, terminando em `/api/v1` (ex.: `https://biblioteca-api.onrender.com/api/v1`)
 3. O `vercel.json` já inclui o rewrite necessário para o React Router funcionar em qualquer rota, inclusive em recarregamentos de página
 
 ## Endpoints principais da API
 
 | Método | Rota | Descrição |
 |---|---|---|
-| POST | /api/register | Cria um novo usuário |
-| POST | /api/login | Autentica e retorna um token Sanctum |
-| GET | /api/livros | Lista livros (aceita `?busca=` e `?disponiveis=1`) |
-| POST | /api/livros | Cadastra um livro (requer perfil bibliotecário) |
-| POST | /api/livros/{id}/emprestimos | Registra um empréstimo |
-| PATCH | /api/emprestimos/{id}/devolucao | Registra a devolução |
-| POST | /api/livros/{id}/capa | Envia/substitui a capa do livro (multipart, campo `capa`) |
-| DELETE | /api/livros/{id}/capa | Remove a capa atual do livro |
+| POST | /api/v1/register | Cria um novo usuário |
+| POST | /api/v1/login | Autentica e retorna um token Sanctum |
+| GET | /api/v1/livros | Lista livros (aceita `?busca=` e `?disponiveis=1`) |
+| POST | /api/v1/livros | Cadastra um livro (requer perfil bibliotecário) |
+| POST | /api/v1/livros/{id}/emprestimos | Registra um empréstimo |
+| PATCH | /api/v1/emprestimos/{id}/devolucao | Registra a devolução |

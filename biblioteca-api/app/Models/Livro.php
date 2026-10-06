@@ -10,35 +10,35 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Livro extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $fillable = ['titulo', 'isbn', 'ano_publicacao', 'capa_path', 'capa_url', 'autor_id'];
+  protected $fillable = ['titulo', 'isbn', 'ano_publicacao', 'capa_url', 'autor_id'];
 
-    public function autor(): BelongsTo
-    {
-        return $this->belongsTo(Autor::class);
-    }
+  public function autor(): BelongsTo
+  {
+    return $this->belongsTo(Autor::class);
+  }
 
-    public function categorias(): BelongsToMany
-    {
-        return $this->belongsToMany(Categoria::class);
-    }
+  public function categorias(): BelongsToMany
+  {
+    return $this->belongsToMany(Categoria::class);
+  }
 
-    public function emprestimos(): HasMany
-    {
-        return $this->hasMany(Emprestimo::class);
-    }
+  public function emprestimos(): HasMany
+  {
+    return $this->hasMany(Emprestimo::class);
+  }
 
-    public function reservas(): HasMany
-    {
-        return $this->hasMany(Reserva::class);
-    }
+  public function reservas(): HasMany
+  {
+    return $this->hasMany(Reserva::class);
+  }
 
-    // Scope local: só livros sem nenhum empréstimo em aberto
-    public function scopeDisponiveis($query)
-    {
-        return $query->whereDoesntHave('emprestimos', function ($q) {
-            $q->whereNull('data_devolucao_real');
-        });
-    }
+  // Scope local: só livros sem nenhum empréstimo em aberto
+  public function scopeDisponiveis($query)
+  {
+    return $query->whereDoesntHave('emprestimos', function ($q) {
+      $q->whereNull('data_devolucao_real');
+    });
+  }
 }
